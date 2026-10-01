@@ -41,7 +41,7 @@ jobs:
           flavor: |
             latest=auto
           images: |
-            ghcr.io/matrix-org/matrix-hookshot
+            ghcr.io/formeo14/matrixbridgemanager
 
   docker-build:
     permissions:
@@ -83,7 +83,7 @@ jobs:
             latest=auto
             suffix=-${{ matrix.arch }},onlatest=true
           images: |
-            ghcr.io/matrix-org/matrix-hookshot
+            ghcr.io/formeo14/matrixbridgemanager
 
       - name: Build Docker image for smoke test
         uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
@@ -101,6 +101,16 @@ jobs:
             matrix-hookshot:smoke-test 2>&1 || true)
           echo "$output"
           echo "$output" | grep -q "Loading config from"
+
+      - name: Export Docker image
+        run: docker save matrix-hookshot:smoke-test | gzip > matrixbridgemanager-${{ matrix.arch }}.tar.gz
+
+      - name: Upload Docker image artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-image-${{ matrix.arch }}
+          path: matrixbridgemanager-${{ matrix.arch }}.tar.gz
+          retention-days: 14
 
       - name: Build and push Docker images
         if: github.event_name == 'push' || github.event_name == 'release'
