@@ -64,7 +64,7 @@ export class CommandBridgeAdapter implements BridgeManagementAdapter {
   }
 
   private async bridgeId(): Promise<string> {
-    if (this.resolvedBridgeId) return this.resolvedBridgeId;
+    if (this.resolvedBridgeId !== undefined) return this.resolvedBridgeId;
     const configured = this.options.bridge.databaseBridgeId;
     const present = await this.options.database.bridgeIds();
     if (configured) {

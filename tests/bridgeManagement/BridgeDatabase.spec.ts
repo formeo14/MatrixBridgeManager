@@ -11,6 +11,7 @@ import { createHash } from "node:crypto";
 import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { DatabaseSync } from "node:sqlite";
 import { Client } from "pg";
 import {
   PostgresBridgeDatabase,
@@ -20,6 +21,7 @@ import {
 import {
   BRIDGE,
   LOGIN,
+  OWNER,
   bridgev2Schema,
   createSqliteBridgeDatabase,
   seedStatements,
@@ -108,6 +110,27 @@ describe("SQLite bridge database", () => {
     await expect(database.raw(sql)).rejects.toThrow(/readonly|read-only/i);
     await database.close();
     expect(digest()).toEqual(before);
+  });
+
+  it("keeps an empty bridge ID, as stored by bridges without a configured ID", async () => {
+    const emptyPath = join(directory, "empty-id.db");
+    const writer = new DatabaseSync(emptyPath);
+    writer.exec(bridgev2Schema("sqlite"));
+    writer
+      .prepare(`INSERT INTO "user" (bridge_id, mxid) VALUES ('', ?)`)
+      .run(OWNER);
+    writer
+      .prepare(
+        `INSERT INTO user_login (bridge_id, user_mxid, id, remote_name, metadata) VALUES ('', ?, ?, 'Relay', '{}')`,
+      )
+      .run(OWNER, LOGIN);
+    writer.close();
+    const database = new SqliteBridgeDatabase(emptyPath);
+    expect(await database.bridgeIds()).toEqual([""]);
+    expect((await database.logins("")).map((login) => login.id)).toEqual([
+      LOGIN,
+    ]);
+    await database.close();
   });
 
   it("fails clearly on a database that is not a bridgev2 database", async () => {

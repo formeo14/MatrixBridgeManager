@@ -99,7 +99,13 @@ abstract class ReadOnlyBridgeDatabase implements BridgeDatabase {
   }
   public async bridgeIds(): Promise<string[]> {
     const rows = await this.query(QUERIES.bridgeIds, []);
-    return [...new Set(rows.map((row) => text(row.bridge_id)))].filter(Boolean);
+    return [
+      ...new Set(
+        rows
+          .filter((row) => typeof row.bridge_id === "string")
+          .map((row) => text(row.bridge_id)),
+      ),
+    ];
   }
   public async logins(bridgeId: string): Promise<BridgeLoginRow[]> {
     const rows = await this.query(QUERIES.logins, [bridgeId]);
