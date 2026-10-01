@@ -36,7 +36,7 @@ describe("End-2-End Encryption support", () => {
     });
     await user.setUserPowerLevel(testEnv.botMxid, testRoomId, 50);
     await user.waitForRoomJoin({ sender: testEnv.botMxid, roomId: testRoomId });
-    await user.sendText(testRoomId, "!hookshot help");
+    await user.sendText(testRoomId, "!linker help");
     await user.waitForRoomEvent<MessageEventContent>({
       eventType: "m.room.message",
       sender: testEnv.botMxid,
@@ -52,7 +52,7 @@ describe("End-2-End Encryption support", () => {
     });
     await user.setUserPowerLevel(testEnv.botMxid, testRoomId, 50);
     await user.waitForRoomJoin({ sender: testEnv.botMxid, roomId: testRoomId });
-    await user.sendText(testRoomId, "!hookshot webhook test-webhook");
+    await user.sendText(testRoomId, "!linker webhook test-webhook");
     const inviteResponse = await user.waitForRoomInvite({
       sender: testEnv.botMxid,
     });

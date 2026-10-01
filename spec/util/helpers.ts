@@ -41,7 +41,7 @@ export async function createInboundConnection(
 
   await user.sendText(
     roomId,
-    "!hookshot webhook test" + (duration ? ` ${duration}` : ""),
+    "!linker webhook test" + (duration ? ` ${duration}` : ""),
   );
   // Test the contents of this.
   await connectionEvent;

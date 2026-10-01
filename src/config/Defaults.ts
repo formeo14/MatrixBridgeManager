@@ -47,11 +47,11 @@ export const DefaultConfigRoot: BridgeConfigRoot = {
     disallowedIpRanges: DefaultDisallowedIpRanges,
     // Don't set allowedIpRanges as overriding any of DefaultDisallowedIpRanges by default doesn't make sense
     branding: {
-      widgetTitle: "Hookshot Configuration",
+      widgetTitle: "Linker",
     },
   },
   bot: {
-    displayname: "Hookshot Bot",
+    displayname: "Linker",
     avatar: "mxc://half-shot.uk/2876e89ccade4cb615e210c458e2a7a6883fe17d",
   },
   serviceBots: [

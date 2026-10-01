@@ -78,7 +78,7 @@ export class BridgeWidgetConfig {
       );
     }
     this.branding = yaml.branding || {
-      widgetTitle: "Hookshot Configuration",
+      widgetTitle: "Linker",
     };
     if (yaml.openIdOverrides) {
       this.openIdOverrides = {};

@@ -32,7 +32,7 @@ on port `9993`, then you should configure the `url` to be `http://hookshot:9993`
 
 ## 2. The bot joins, but doesn't respond to my messages.
 
-Check that you are sending the right format message. `!hookshot help` should always work.
+Check that you are sending the right format message. `!linker help` should always work.
 Otherwise, check whether the room is encrypted and you haven't [enabled encryption](./advanced/encryption.html) for the bot.
 The bot will ignore any messages in encrypted rooms.
 

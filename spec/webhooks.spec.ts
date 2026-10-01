@@ -50,7 +50,7 @@ async function createOutboundConnection(
 
   await user.sendText(
     roomId,
-    `!hookshot outbound-hook test http://localhost:${port}/test-path`,
+    `!linker outbound-hook test http://localhost:${port}/test-path`,
   );
   // Test the contents of this.
   await connectionEvent;

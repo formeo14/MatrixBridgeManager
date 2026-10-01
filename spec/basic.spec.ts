@@ -26,10 +26,10 @@ describe("Basic test setup", () => {
       sender: testEnv.botMxid,
       roomId,
     });
-    await user.sendText(roomId, "!hookshot help");
+    await user.sendText(roomId, "!linker help");
     // Expect help text.
     expect((await msg).data.content.body).to.include(
-      "!hookshot help` - This help text\n",
+      "!linker help` - This help text\n",
     );
   });
 });

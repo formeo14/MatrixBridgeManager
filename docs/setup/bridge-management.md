@@ -101,14 +101,14 @@ Under `/widgetapi/v1/:roomId/bridge-management`:
 ## Text commands
 
 ```text
-!hookshot bridge list
-!hookshot bridge chats <accountId>
-!hookshot bridge connect <accountId> <chatId>
-!hookshot bridge move <accountId> <chatId> <!targetRoom>
-!hookshot bridge disconnect <accountId> <chatId>
-!hookshot bridge relay <accountId> <chatId> on [relayAccountId]
-!hookshot bridge relay <accountId> <chatId> off
-!hookshot bridge reconcile <accountId>
+!linker bridge list
+!linker bridge chats <accountId>
+!linker bridge connect <accountId> <chatId>
+!linker bridge move <accountId> <chatId> <!targetRoom>
+!linker bridge disconnect <accountId> <chatId>
+!linker bridge relay <accountId> <chatId> on [relayAccountId]
+!linker bridge relay <accountId> <chatId> off
+!linker bridge reconcile <accountId>
 ```
 
 `bridge chats` shows group names to everyone in the room.

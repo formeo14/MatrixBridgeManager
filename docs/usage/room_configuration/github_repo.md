@@ -17,7 +17,7 @@ To set up a connection to a GitHub Repository in a new room:
 2. Create a new, unencrypted room. It can be public or private.
 3. Invite the bridge bot (e.g. `@hookshot:example.com`).
 4. Give the bridge bot moderator permissions or higher (power level 50) (or otherwise configure the room so the bot can edit room state).
-5. Send the command `!hookshot github repo https://github.com/my/project`.
+5. Send the command `!linker github repo https://github.com/my/project`.
 6. If you have permission to bridge this repo, the bridge will respond with a confirmation message.
 
 ## Configuration

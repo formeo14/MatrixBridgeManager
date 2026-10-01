@@ -48,7 +48,7 @@ The admin room feature is still very barebones so while it's included here for c
 should leave `addToAdminRooms` off (as it is by default). This flag will add an "admin room" widget to user admin rooms.
 
 The room setup feature is more complete, supporting generic webhook configuration (with more options coming soon).
-This can be enabled by setting `roomSetupWidget` to an object. You can add the widget by saying `!hookshot setup-widget` in any room.
+This can be enabled by setting `roomSetupWidget` to an object. You can add the widget by saying `!linker setup-widget` in any room.
 When `addOnInvite` is true, the bridge will add a widget to rooms when the bot is invited, and the room has **no existing connections**.
 
 `disallowedIpRanges` describes which IP ranges should be disallowed when resolving homeserver IP addresses (for security reasons).

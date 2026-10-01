@@ -13,14 +13,14 @@ To set up a connection to a JIRA project in a new room:
 1. Create a new, unencrypted room. It can be public or private.
 1. Invite the bridge bot (e.g. `@hookshot:example.com`).
 1. Give the bridge bot moderator permissions or higher (power level 50) (or otherwise configure the room so the bot can edit room state).
-1. Send the command `!hookshot jira project https://jira-instance/.../projects/PROJECTKEY/...`.
+1. Send the command `!linker jira project https://jira-instance/.../projects/PROJECTKEY/...`.
 1. If you have permission to bridge this repo, the bridge will respond with a confirmation message.
 
 ## Managing connections
 
-Send the command `!hookshot jira list project` to list all of a room's connections to JIRA projects.
+Send the command `!linker jira list project` to list all of a room's connections to JIRA projects.
 
-Send the command `!hookshot jira remove project <url>` to remove a room's connection to a JIRA project at a given URL.
+Send the command `!linker jira remove project <url>` to remove a room's connection to a JIRA project at a given URL.
 
 ## Configuration
 

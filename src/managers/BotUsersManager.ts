@@ -47,7 +47,7 @@ export default class BotUsersManager {
         this.as.botUserId,
         // Default bot can handle all services
         this.config.enabledServices,
-        "!hookshot",
+        "!linker",
         0,
         this.config.bot?.avatar,
         this.config.bot?.displayname,

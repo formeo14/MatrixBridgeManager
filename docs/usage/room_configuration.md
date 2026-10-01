@@ -16,8 +16,8 @@ heading.
 
 The availability of connection types depends on the configuration provided to hookshot.
 
-### The `!hookshot` command
+### The `!linker` command
 
 Rooms can be bridged by inviting the hookshot bot into a room, and then running the
-`!hookshot` command. Running `!hookshot help` will give you some details, but you should
+`!linker` command. Running `!linker help` will give you some details, but you should
 see the documentation provided for information on each connection type.

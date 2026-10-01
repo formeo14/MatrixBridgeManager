@@ -96,7 +96,7 @@ describe("Permissions test", () => {
     });
     await user.sendText(
       roomId,
-      "!hookshot gitlab project https://github.com/my/project",
+      "!linker gitlab project https://github.com/my/project",
     );
     expect((await msgGitLab).data.content.body).to.include(
       "Failed to handle command: You are not permitted to provision connections for gitlab.",
@@ -121,7 +121,7 @@ describe("Permissions test", () => {
         sender: testEnv.botMxid,
         roomId,
       });
-      await user.sendText(roomId, "!hookshot webhook test");
+      await user.sendText(roomId, "!linker webhook test");
       expect((await msgWebhooks).data.content.body).to.include(
         "Room configured to bridge webhooks. See admin room for secret url.",
       );
@@ -145,7 +145,7 @@ describe("Permissions test", () => {
       sender: testEnv.botMxid,
       roomId,
     });
-    await user.sendText(roomId, "!hookshot webhook test");
+    await user.sendText(roomId, "!linker webhook test");
     expect((await msgWebhooks).data.content.body).to.include(
       "Room configured to bridge webhooks. See admin room for secret url.",
     );

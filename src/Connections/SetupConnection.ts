@@ -1150,7 +1150,7 @@ export class SetupConnection extends CommandConnection {
     ) {
       await this.client.sendNotice(
         this.roomId,
-        `This room already has a setup widget, please open the "Hookshot Configuration" widget.`,
+        `This room already has a setup widget, please open the "Linker" widget.`,
       );
     }
   }

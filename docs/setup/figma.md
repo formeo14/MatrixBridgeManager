@@ -40,5 +40,5 @@ To bridge a figma file into your room, you should:
 
 - Invite the bot user to the room.
 - Make sure the bot able to send state events (usually the Moderator power level in clients)
-- Say `!hookshot figma file fileUrl` where `fileUrl` is the URL to the figma file e.g `https://www.figma.com/files/project/12345/...`
+- Say `!linker figma file fileUrl` where `fileUrl` is the URL to the figma file e.g `https://www.figma.com/files/project/12345/...`
 - Figma comments will now be bridged into the room.
