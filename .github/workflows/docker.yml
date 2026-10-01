@@ -1,54 +1,31 @@
-# Based on https://github.com/matrix-org/dendrite/blob/master/.github/workflows/docker-hub.yml
+name: Docker Build and Push
 
-name: "Docker"
-
+# Builds the image natively on amd64 and arm64 runners, smoke tests it,
+# uploads it as a workflow artifact and pushes it to GitHub Container Registry
+# on main pushes and version tags.
 on:
   push:
     branches: [main]
-    paths-ignore:
-      - 'changelog.d/**'
+    tags: ["v*"]
   pull_request:
     branches: [main]
-    paths-ignore:
-      - 'changelog.d/**'
-  release:
-    types: [published]
-
-  merge_group:
+  workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}
-  cancel-in-progress: false
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
-permissions: {}
+permissions:
+  contents: read
+  packages: write
+
+env:
+  PUSH: ${{ github.event_name != 'pull_request' }}
 
 jobs:
-  docker-clean-metadata:
-    if: github.event_name == 'push' || github.event_name == 'release'
-    runs-on: ubuntu-latest
-    outputs:
-      json: ${{ steps.meta.outputs.json }}
-    steps:
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5
-        with:
-          tags: |
-            type=semver,pattern={{version}}
-            type=ref,event=branch
-            type=ref,event=pr
-            type=raw,value=latest,enable={{is_default_branch}}
-          flavor: |
-            latest=auto
-          images: |
-            ghcr.io/formeo14/matrixbridgemanager
-
-  docker-build:
-    permissions:
-      contents: read
-      packages: write
-      attestations: write
-      id-token: write
+  build:
+    name: build (${{ matrix.arch }})
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         include:
@@ -57,97 +34,93 @@ jobs:
           - os: ubuntu-24.04-arm
             arch: arm64
 
-    runs-on: ${{ matrix.os }}
-
     steps:
       - name: Checkout
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-        with:
-          persist-credentials: false
-      - name: Log in to the GitHub Container registry
-        if: github.event_name == 'push' || github.event_name == 'release'
-        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
+        uses: actions/checkout@v4
+
+      - name: Set image name
+        run: echo "IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_ENV"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        if: env.PUSH == 'true'
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: ${{ github.repository_owner }}
+          username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5
-        with:
-          tags: |
-            type=semver,pattern={{version}}
-            type=ref,event=branch
-            type=raw,value=latest,enable={{is_default_branch}}
-          flavor: |
-            latest=auto
-            suffix=-${{ matrix.arch }},onlatest=true
-          images: |
-            ghcr.io/formeo14/matrixbridgemanager
 
-      - name: Build Docker image for smoke test
-        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+      - name: Build image
+        uses: docker/build-push-action@v5
         with:
-          push: false
+          context: .
           load: true
-          tags: matrix-hookshot:smoke-test
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: matrixbridgemanager:test
+          cache-from: type=gha,scope=${{ matrix.arch }}
+          cache-to: type=gha,scope=${{ matrix.arch }},mode=max
 
-      - name: Smoke test Docker image
+      - name: Smoke test image
         run: |
           printf '{}\n' > /tmp/hookshot-config.yml
           output=$(timeout 10 docker run --rm \
             -v /tmp/hookshot-config.yml:/data/config.yml:ro \
-            matrix-hookshot:smoke-test 2>&1 || true)
+            matrixbridgemanager:test 2>&1 || true)
           echo "$output"
           echo "$output" | grep -q "Loading config from"
 
-      - name: Export Docker image
-        run: docker save matrix-hookshot:smoke-test | gzip > matrixbridgemanager-${{ matrix.arch }}.tar.gz
+      - name: Export image
+        run: docker save matrixbridgemanager:test | gzip > matrixbridgemanager-${{ matrix.arch }}.tar.gz
 
-      - name: Upload Docker image artifact
+      - name: Upload image artifact
         uses: actions/upload-artifact@v4
         with:
           name: docker-image-${{ matrix.arch }}
           path: matrixbridgemanager-${{ matrix.arch }}.tar.gz
           retention-days: 14
 
-      - name: Build and push Docker images
-        if: github.event_name == 'push' || github.event_name == 'release'
-        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
-        with:
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+      - name: Push arch image
+        if: env.PUSH == 'true'
+        run: |
+          docker tag matrixbridgemanager:test "$IMAGE:${GITHUB_SHA::7}-${{ matrix.arch }}"
+          docker push "$IMAGE:${GITHUB_SHA::7}-${{ matrix.arch }}"
 
-  docker-manifest:
-    if: github.event_name == 'push' || github.event_name == 'release'
-    needs:
-      - docker-build
-      - docker-clean-metadata
+  manifest:
+    name: manifest
     runs-on: ubuntu-latest
-
-    permissions:
-      contents: read
-      packages: write
-      attestations: write
-      id-token: write
-
-    strategy:
-      matrix:
-        image: ${{ fromJson(needs.docker-clean-metadata.outputs.json).tags }}
+    needs: build
+    if: github.event_name != 'pull_request'
 
     steps:
-      - name: Log in to the GitHub Container registry
-        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
+      - name: Set image name
+        run: echo "IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_ENV"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Create and push manifest
-        run: |
-          docker manifest create ${MATRIX_IMAGE} ${MATRIX_IMAGE}-amd64 ${MATRIX_IMAGE}-arm64
-          docker manifest push ${MATRIX_IMAGE}
+      - name: Extract metadata (tags)
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE }}
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=ref,event=tag
+            type=sha,prefix=,format=short
+
+      - name: Create and push multi-arch manifest
         env:
-          MATRIX_IMAGE: ${{ matrix.image }}
+          TAGS: ${{ steps.meta.outputs.tags }}
+        run: |
+          src="$IMAGE:${GITHUB_SHA::7}"
+          args=()
+          for tag in $TAGS; do args+=(-t "$tag"); done
+          docker buildx imagetools create "${args[@]}" "$src-amd64" "$src-arm64"
