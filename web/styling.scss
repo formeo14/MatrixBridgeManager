@@ -1,0 +1,44 @@
+@import url("@vector-im/compound-design-tokens/assets/web/css/compound-design-tokens.css")
+layer(compound);
+@import url("@vector-im/compound-web");
+
+:root {
+  --background-color: #ffffff;
+  --foreground-color: #17191c;
+  --primary-color: #0dbd8b;
+  --primary-color-disabled: #0dbd8baf;
+
+  background-color: #f4f6fa;
+  color: var(--foreground-color);
+  min-height: 100%;
+  width: 100%;
+  font-family:
+    "Inter", "Twemoji", "Apple Color Emoji", "Segoe UI Emoji", "Arial",
+    "Helvetica", sans-serif, "Noto Color Emoji";
+}
+
+// @media (prefers-color-scheme: dark) {
+//   :root {
+//     --background-color: #111111;
+//     --foreground-color: #f2f5f8;
+//   }
+// }
+
+a {
+  color: var(--primary-color);
+}
+
+a:visited {
+  color: var(--primary-color);
+}
+
+body {
+  margin: 0;
+  height: fit-content;
+  block-size: fit-content !important;
+}
+
+button {
+  font-weight: 600;
+  margin-right: 8px;
+}

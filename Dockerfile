@@ -1,0 +1,57 @@
+ARG NODE_VERSION=24
+
+# Stage 0: Build the thing
+# Need debian based image to build the native rust module
+# as musl doesn't support cdylib
+FROM node:${NODE_VERSION}-slim AS builder
+
+# Needed in order to build rust FFI bindings.
+RUN apt-get update && apt-get install -y build-essential cmake curl pkg-config pkg-config libssl-dev
+
+RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --profile minimal
+ENV PATH="/root/.cargo/bin:${PATH}"
+
+# arm64 builds consume a lot of memory if `CARGO_NET_GIT_FETCH_WITH_CLI` is not
+# set to true, so we expose it as a build-arg.
+ARG CARGO_NET_GIT_FETCH_WITH_CLI=false
+ENV CARGO_NET_GIT_FETCH_WITH_CLI=$CARGO_NET_GIT_FETCH_WITH_CLI
+
+
+WORKDIR /src
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY modules ./modules
+RUN corepack enable pnpm
+RUN pnpm config set store-dir /cache/pnpm-store
+RUN pnpm install --frozen-lockfile
+
+COPY . ./
+
+RUN pnpm run build
+
+
+# Stage 1: The actual container
+FROM node:${NODE_VERSION}-slim
+
+WORKDIR /bin/matrix-hookshot
+
+RUN apt-get update && apt-get install -y openssl ca-certificates
+
+COPY --from=builder /src/pnpm-lock.yaml /src/package.json /src/pnpm-workspace.yaml ./
+COPY --from=builder /cache/pnpm-store /cache/pnpm-store
+RUN corepack enable pnpm
+RUN pnpm config set store-dir /cache/pnpm-store
+
+RUN NODE_ENV=production pnpm install --frozen-lockfile && pnpm store prune
+
+COPY --from=builder /src/lib ./
+COPY --from=builder /src/public ./public
+COPY --from=builder /src/assets ./assets
+
+ENV NODE_ENV="production"
+
+VOLUME /data
+EXPOSE 9993
+EXPOSE 7775
+
+CMD ["node", "/bin/matrix-hookshot/App/BridgeApp.js", "/data/config.yml", "/data/registration.yml"]

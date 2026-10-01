@@ -1,0 +1,12 @@
+{
+  "name": "matrix-bridge-merge-ui-demo",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Drives the compiled MatrixBridgeMerge widget with sample data and captures screenshots.",
+  "devDependencies": {
+    "playwright-core": "1.56.1"
+  },
+  "scripts": {
+    "demo": "node demo.cjs"
+  }
+}

@@ -1,0 +1,22 @@
+services:
+  linker:
+    build: ../..
+    restart: unless-stopped
+    volumes:
+      - ./config.yml:/data/config.yml:ro
+      - ./registration.yml:/data/registration.yml:ro
+      - linker-data:/data/state
+      - ../line-bridge/data:/bridges/line:ro
+    environment:
+      WHATSAPP_DB_USER: ${WHATSAPP_DB_READONLY_USER}
+      WHATSAPP_DB_PASSWORD: ${WHATSAPP_DB_READONLY_PASSWORD}
+      SIGNAL_DB_URI: postgres://${SIGNAL_DB_READONLY_USER}:${SIGNAL_DB_READONLY_PASSWORD}@signal-db/signal
+      RELAY_ACCESS_TOKEN: ${RELAY_ACCESS_TOKEN}
+    networks: [matrix]
+
+volumes:
+  linker-data:
+
+networks:
+  matrix:
+    external: true

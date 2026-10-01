@@ -1,0 +1,69 @@
+name: matrix-hookshot-dev
+
+services:
+  valkey:
+    image: valkey/valkey:9
+
+  element:
+    image: vectorim/element-web:develop
+    volumes:
+      - ./contrib/docker/element/config.json:/app/config.json:ro
+    ports:
+      - "127.0.0.1:8083:80"
+
+  init-app:
+    image: alpine:3
+    command: /contrib/init.sh
+    volumes:
+      - ./contrib/docker/:/contrib:ro
+      - hookshot-data:/data
+      - synapse-data:/synapse-data
+
+  synapse:
+    image: matrixdotorg/synapse:latest
+    ports:
+      - "127.0.0.1:8008:8008"
+    environment:
+      - SYNAPSE_CONFIG_DIR=/contrib/synapse
+    volumes:
+      - ./contrib/docker:/contrib:ro
+      - synapse-data:/data
+    depends_on:
+      init-app:
+        condition: service_completed_successfully
+
+  app:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - "127.0.0.1:9001:9001"
+    volumes:
+      - hookshot-data:/data
+      - ./contrib/docker/:/contrib:ro
+      - ./config.yml:/config/config.yml:ro
+    links:
+      - valkey
+      - synapse
+    command: node /bin/matrix-hookshot/App/BridgeApp.js /contrib/config.yaml /contrib/registration.yaml /config/config.yml
+    depends_on:
+      valkey:
+        condition: service_started
+      init-app:
+        condition: service_completed_successfully
+      synapse:
+        condition: service_healthy
+    develop:
+      watch:
+        - action: rebuild
+          path: .
+          ignore:
+            - node_modules/
+            - docs/
+            - public/
+            - book/
+            - .*/
+
+volumes:
+  hookshot-data:
+  synapse-data:

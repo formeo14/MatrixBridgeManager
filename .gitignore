@@ -1,0 +1,34 @@
+config.yml
+lib/
+node_modules/
+registration.yml
+tsconfig.tsbuildinfo
+public/
+storybook-static/
+
+.idea
+# Added by cargo
+/target
+
+# Generated during build
+/src/libRs.d.ts
+
+# Generated during test run
+/spec-lib
+/hookshot-int-*
+
+book
+*.cer
+*.pem
+*.pcks8
+
+# Coverage
+coverage
+.nyc_output
+
+# Devenv
+.devenv*
+devenv.local.nix
+
+# direnv
+.direnv
